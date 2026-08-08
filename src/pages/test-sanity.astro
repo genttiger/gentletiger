@@ -1,0 +1,27 @@
+---
+import { client } from "../lib/sanity";
+
+const posts = await client.fetch(`
+  *[_type == "article"]{
+    title,
+    slug,
+    excerpt
+  }
+`);
+---
+
+<html>
+  <body>
+    <h1>Sanity Test</h1>
+
+    {
+      posts.map((post:any)=>(
+        <article>
+          <h2>{post.title}</h2>
+          <p>{post.excerpt}</p>
+        </article>
+      ))
+    }
+
+  </body>
+</html>

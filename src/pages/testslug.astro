@@ -1,0 +1,14 @@
+---
+import { sanityClient } from "../lib/sanity";
+
+const articles = await sanityClient.fetch(`
+*[_type=="article"]{
+title,
+slug
+}
+`);
+---
+
+<pre>
+{JSON.stringify(articles,null,2)}
+</pre>

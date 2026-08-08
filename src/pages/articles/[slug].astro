@@ -1,0 +1,38 @@
+---
+import { sanityClient } from "../../lib/sanity";
+import { PortableText } from "@portabletext/react";
+
+export async function getStaticPaths() {
+
+  const articles = await sanityClient.fetch(`
+    *[_type == "article" && defined(slug.current)]{
+      title,
+      slug,
+      body,
+      excerpt
+    }
+  `);
+
+  return articles.map((article)=>({
+    params:{
+      slug: article.slug.current
+    },
+    props:{
+      article
+    }
+  }));
+
+}
+
+const { article } = Astro.props;
+---
+
+<h1>{article.title}</h1>
+
+{article.excerpt && (
+  <p>{article.excerpt}</p>
+)}
+
+{article.body && (
+  <PortableText value={article.body} />
+)}

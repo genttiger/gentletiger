@@ -1,0 +1,40 @@
+---
+import { sanityClient } from '../lib/sanity'
+
+const articles = await sanityClient.fetch(`
+
+*[_type=="article"]{
+  title,
+  slug,
+  excerpt
+}
+
+`)
+
+---
+
+<html>
+
+<body>
+
+<h1>
+Sanity Test
+</h1>
+
+
+{
+articles.map((article)=>(
+<div>
+
+<h2>{article.title}</h2>
+
+<p>{article.excerpt}</p>
+
+</div>
+))
+}
+
+
+</body>
+
+</html>

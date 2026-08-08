@@ -6,7 +6,7 @@ export default defineConfig({
 
   site: 'https://genttiger.com',
 
-  output: 'server',
+  output: 'static',
 
   integrations: [
     react()

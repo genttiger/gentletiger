@@ -2,83 +2,39 @@
 import Layout from '../layouts/Layout.astro'
 import { sanityClient } from '../lib/sanity'
 
-
 const articles = await sanityClient.fetch(`
-*[_type=="article"]
+*[_type=="article" && defined(slug.current)]
 | order(publishedAt desc)[0...6]{
-title,
-excerpt,
-"slug": slug.current,
-publishedAt
+  title,
+  excerpt,
+  "slug": slug.current,
+  publishedAt
 }
 `)
-
 ---
 
 <Layout
-title="GentleTiger"
-description="AI powered knowledge and content platform."
+  title="GentleTiger"
+  description="AI powered knowledge and content platform."
 >
 
-
-<main>
-
-
-<section>
-
-<h1>
-GentleTiger
-</h1>
-
-
-<h2>
-AI Powered Knowledge & Content Platform
-</h2>
-
-
-<p>
-Building intelligent content systems with AI, automation and modern web technology.
-</p>
-
-
-</section>
-
-
-
-<section>
-
-<h2>
-Latest Articles
-</h2>
-
+<h1>Latest Articles</h1>
 
 {
-articles.map((article)=>(
-<article>
+  articles.map((article) => (
+    <article>
+      <h2>
+        <a href={`/articles/${article.slug}`}>
+          {article.title}
+        </a>
+      </h2>
 
-<h3>
+      {article.excerpt && (
+        <p>{article.excerpt}</p>
+      )}
 
-<a href={`/blog/${article.slug}`}>
-{article.title}
-</a>
-
-</h3>
-
-
-<p>
-{article.excerpt}
-</p>
-
-
-</article>
-))
+    </article>
+  ))
 }
-
-
-</section>
-
-
-</main>
-
 
 </Layout>
