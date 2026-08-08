@@ -1,11 +1,84 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro'
+import { sanityClient } from '../lib/sanity'
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+
+const articles = await sanityClient.fetch(`
+*[_type=="article"]
+| order(publishedAt desc)[0...6]{
+title,
+excerpt,
+"slug": slug.current,
+publishedAt
+}
+`)
+
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+title="GentleTiger"
+description="AI powered knowledge and content platform."
+>
+
+
+<main>
+
+
+<section>
+
+<h1>
+GentleTiger
+</h1>
+
+
+<h2>
+AI Powered Knowledge & Content Platform
+</h2>
+
+
+<p>
+Building intelligent content systems with AI, automation and modern web technology.
+</p>
+
+
+</section>
+
+
+
+<section>
+
+<h2>
+Latest Articles
+</h2>
+
+
+{
+articles.map((article)=>(
+<article>
+
+<h3>
+
+<a href={`/blog/${article.slug}`}>
+{article.title}
+</a>
+
+</h3>
+
+
+<p>
+{article.excerpt}
+</p>
+
+
+</article>
+))
+}
+
+
+</section>
+
+
+</main>
+
+
 </Layout>

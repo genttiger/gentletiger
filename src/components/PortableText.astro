@@ -1,0 +1,9 @@
+---
+import {toHTML} from '@portabletext/to-html'
+
+const {value} = Astro.props
+
+const html = toHTML(value)
+---
+
+<div set:html={html}></div>

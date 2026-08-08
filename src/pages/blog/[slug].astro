@@ -1,24 +1,151 @@
 ---
-export async function getStaticPaths() {
-  const posts = import.meta.glob('../../content/blog/*.md', {
-    eager: true
-  });
+import { sanityClient } from '../../lib/sanity'
+import { urlFor } from '../../lib/image'
+import PortableText from '../../components/PortableText.astro'
+import Layout from '../../layouts/Layout.astro'
 
-  return Object.entries(posts).map(([path, post]) => ({
-    params: {
-      slug: path.split('/').pop().replace('.md', '')
-    },
-    props: {
-      post
+
+export async function getStaticPaths() {
+
+  const articles = await sanityClient.fetch(`
+    *[_type=="article"]{
+      "slug": slug.current
     }
-  }));
+  `)
+
+  return articles.map((article) => ({
+    params: {
+      slug: article.slug
+    }
+  }))
 }
 
-const { post } = Astro.props;
+
+const { slug } = Astro.params
+
+
+const article = await sanityClient.fetch(
+`
+*[_type=="article" && slug.current==$slug][0]{
+  title,
+  excerpt,
+  body,
+  seoTitle,
+  seoDescription,
+  keywords,
+  publishedAt,
+  mainImage,
+  category,
+  author
+}
+`,
+{
+  slug
+}
+)
+
+
+const imageUrl = article.mainImage
+  ? urlFor(article.mainImage).width(1200).url()
+  : null
+
 ---
 
-<h1>{post.frontmatter.title}</h1>
+<Layout
+  title={article.seoTitle || article.title}
+  description={article.seoDescription || article.excerpt}
+>
 
-<p>{post.frontmatter.description}</p>
 
-<div set:html={post.compiledContent()}></div>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{article.title}",
+  "description": "{article.excerpt}",
+  "author": {
+    "@type": "Person",
+    "name": "{article.author}"
+  },
+  "datePublished": "{article.publishedAt}",
+  "articleSection": "{article.category}",
+  "image": "{imageUrl}"
+}
+</script>
+
+
+<article>
+
+
+<header>
+
+
+<h1>
+{article.title}
+</h1>
+
+
+{
+imageUrl && (
+<img
+src={imageUrl}
+alt={article.title}
+/>
+)
+}
+
+
+<p>
+{article.excerpt}
+</p>
+
+
+
+<div>
+
+
+{
+article.author && (
+<p>
+Author: {article.author}
+</p>
+)
+}
+
+
+{
+article.publishedAt && (
+<p>
+Published: {new Date(article.publishedAt).toLocaleDateString()}
+</p>
+)
+}
+
+
+{
+article.category && (
+<p>
+Category: {article.category}
+</p>
+)
+}
+
+
+</div>
+
+
+</header>
+
+
+
+<section>
+
+<PortableText value={article.body}/>
+
+</section>
+
+
+</article>
+
+
+</Layout>
