@@ -1,15 +1,22 @@
 ---
 import { sanityClient } from "../../lib/sanity";
-import { PortableText } from "@portabletext/react";
+import ArticlePortableText from "../../components/ArticlePortableText";
 
 export async function getStaticPaths() {
 
   const articles = await sanityClient.fetch(`
-    *[_type == "article" && defined(slug.current)]{
+    *[_type=="article" && defined(slug.current)]{
       title,
       slug,
-      body,
-      excerpt
+      body[]{
+        ...,
+        _type == "videoFile" => {
+          "url": asset.asset->url,
+          "mimeType": asset.asset->mimeType
+        }
+      },
+      excerpt,
+      publishedAt
     }
   `);
 
@@ -25,14 +32,57 @@ export async function getStaticPaths() {
 }
 
 const { article } = Astro.props;
+
 ---
+
+<html>
+<head>
+<title>{article.title}</title>
+</head>
+
+<body>
 
 <h1>{article.title}</h1>
 
 {article.excerpt && (
-  <p>{article.excerpt}</p>
+<p>
+{article.excerpt}
+</p>
 )}
 
-{article.body && (
-  <PortableText value={article.body} />
-)}
+
+{article.body && <ArticlePortableText value={article.body} />}
+
+</body>
+</html>
+
+<style>
+  :global(.article-media) {
+    margin: 2rem 0;
+  }
+
+  :global(.article-media img),
+  :global(.article-media video),
+  :global(.article-media iframe) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    border: 0;
+    border-radius: 0.75rem;
+  }
+
+  :global(.article-media img),
+  :global(.article-media video) {
+    height: auto;
+  }
+
+  :global(.article-media iframe) {
+    aspect-ratio: 16 / 9;
+  }
+
+  :global(.article-media figcaption) {
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+</style>
