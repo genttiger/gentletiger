@@ -7,15 +7,22 @@ const embedUrl = (sourceUrl?: string) => {
   try {
     const url = new URL(sourceUrl)
     if (url.hostname === 'youtu.be') {
-      return `https://www.youtube-nocookie.com/embed/${url.pathname.slice(1)}`
+      const videoId = url.pathname.slice(1).split('/')[0]
+      return /^[A-Za-z0-9_-]{6,20}$/.test(videoId)
+        ? `https://www.youtube-nocookie.com/embed/${videoId}`
+        : null
     }
-    if (url.hostname.endsWith('youtube.com')) {
+    if (url.hostname === 'youtube.com' || url.hostname === 'www.youtube.com') {
       const videoId = url.searchParams.get('v')
-      return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}` : null
+      return videoId && /^[A-Za-z0-9_-]{6,20}$/.test(videoId)
+        ? `https://www.youtube-nocookie.com/embed/${videoId}`
+        : null
     }
-    if (url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com')) {
+    if (url.hostname === 'vimeo.com' || url.hostname === 'www.vimeo.com') {
       const videoId = url.pathname.split('/').filter(Boolean).pop()
-      return videoId ? `https://player.vimeo.com/video/${videoId}` : null
+      return videoId && /^\d+$/.test(videoId)
+        ? `https://player.vimeo.com/video/${videoId}`
+        : null
     }
   } catch {
     return null
