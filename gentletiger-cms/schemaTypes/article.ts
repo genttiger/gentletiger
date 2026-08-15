@@ -178,6 +178,22 @@ export default defineType({
     }),
 
     defineField({
+      name: 'visibility',
+      title: 'Website Visibility',
+      type: 'string',
+      group: 'content',
+      description: 'Unlisted articles remain available by direct URL but are removed from listings and search engines.',
+      initialValue: 'public',
+      options: {
+        layout: 'radio',
+        list: [
+          {title: 'Public', value: 'public'},
+          {title: 'Unlisted', value: 'unlisted'},
+        ],
+      },
+    }),
+
+    defineField({
       name:'mainImage',
       title:'Main Image',
       type:'image',
